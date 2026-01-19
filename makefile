@@ -1,10 +1,13 @@
+CXX = g++
 LDLIBS=-lpcap
 
 all: airodump
 
-main.o: main.cpp
-
 airodump: main.o
+	$(CXX) main.o $(LDLIBS) -o airodump
+
+main.o: main.cpp
+	$(CXX) -c main.cpp -o main.o
 
 clean:
 	rm -f airodump *.o
