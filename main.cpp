@@ -8,15 +8,15 @@
 struct ST_PRINT
 {   
     std::string BSSID;
-    std::string PWR;
+    //std::string PWR;
     std::string BEACONS;
     std::string DATA;
-    std::string s;
-    std::string CH;
-    std::string MB;
+    //std::string s;
+    //std::string CH;
+    //std::string MB;
     std::string ENC;
-    std::string CIPHER;
-    std::string AUTH;
+    //std::string CIPHER;
+    //std::string AUTH;
     std::string ESSID;
 };
 
@@ -78,13 +78,25 @@ int main(int argc, char* argv[])
             break;
         }
         //printf("%u bytes captured\n", header->caplen);
-        int headerLen = *(packet+2);
-        int subtypes = *(packet+headerLen);
+        uint64_t headerLen = *(packet+2);
+        uint64_t subtypes = *(packet+headerLen);
+        //uint64_t bssid = *(packet+headerLen+16);
         
         if (subtypes == 0x80)
         {
-            printf("len = %d, type = %x\n", headerLen, subtypes);
-            printf("Beacon Frame Captured\n");
+            //printf("len = %d, type = %x\n", headerLen, subtypes);
+            //printf("Beacon Frame Captured\n");
+            printf("bssid: ");
+            for (int i=0; i<6; i++)
+            {
+                if (i == 5)
+                {
+                    printf("%02x\n", *(packet+headerLen+16+i));
+                } else 
+                {
+                    printf("%02x:", *(packet+headerLen+16+i));
+                }
+            }
         }
         
     }
