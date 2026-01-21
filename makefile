@@ -5,7 +5,7 @@ LDLIBS=-lpcap
 all: airodump
 
 airodump: main.o beacon.o radiotap.o 802_11.o
-	$(CXX) main.o beacon.o radiotap.o $(LDLIBS) -o airodump
+	$(CXX) main.o beacon.o radiotap.o 802_11.o $(LDLIBS) -o airodump
 
 main.o: main.cpp
 	$(CXX) $(CXXFLAGS) -c main.cpp -o main.o
