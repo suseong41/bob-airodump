@@ -4,6 +4,11 @@
 #include <map>
 #include <stdbool.h>
 #include <pcap.h>
+#include <iostream>
+#include <unistd.h>
+
+#include "radiotap.h"
+#include "beacon.h"
 
 struct ST_PRINT
 {   
@@ -49,10 +54,16 @@ bool parse(Param* param, int argc, char* argv[]) {
 	return true;
 }
 
+void clean()
+{   
+    std::cout << "\033[H\033[2J\033[3J";
+}
 // BSSID, BEACONS, 
 int main(int argc, char* argv[])
 {
     if(!parse(&param, argc, argv)) { return -1; }
+    
+    //clean();
     
     char errbuf[PCAP_ERRBUF_SIZE];
     pcap_t* pcap = pcap_open_live(param.dev_, BUFSIZ, 1, 1000, errbuf);
@@ -61,7 +72,6 @@ int main(int argc, char* argv[])
         fprintf(stderr, "pcap_open_live(%s) return null - %s\n", param.dev_, errbuf);
         return -1;
     }
-    printf("hello world\n");
     
     while(true)
     {
@@ -78,13 +88,16 @@ int main(int argc, char* argv[])
             break;
         }
         //printf("%u bytes captured\n", header->caplen);
-        uint64_t headerLen = *(packet+2);
-        uint64_t subtypes = *(packet+headerLen);
-        //uint64_t bssid = *(packet+headerLen+16);
-        
+        ST_RDT_HDR rdt = parseRadiotap(packet);
+        ST_BC_HDR bc = parseBeacon(packet+rdt.len);
+        //uint64_t subtypes = *(packet+headerLen);
+        //uint64_t ssidLen = *(packet+headerLen+37);
+        //uint64_t ssid = *(packet+headerLen+38);
+        /*
         if (subtypes == 0x80)
         {
-            //printf("len = %d, type = %x\n", headerLen, subtypes);
+            //clean();
+            //printf("radiotap len = %d, type = %x\n", headerLen, subtypes);
             //printf("Beacon Frame Captured\n");
             printf("bssid: ");
             for (int i=0; i<6; i++)
@@ -97,7 +110,12 @@ int main(int argc, char* argv[])
                     printf("%02x:", *(packet+headerLen+16+i));
                 }
             }
+            //printf("ssid len = %x", ssidLen);
+            //printf("%d\n", ssid);
+            //std::cout << std::flush;
+            //sleep(0.5);
         }
+        */
         
     }
     
