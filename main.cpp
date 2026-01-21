@@ -8,6 +8,7 @@
 #include <unistd.h>
 
 #include "radiotap.h"
+#include "802_11.h"
 #include "beacon.h"
 
 struct ST_PRINT
@@ -87,9 +88,21 @@ int main(int argc, char* argv[])
             printf("pcap_next_ex return %d(%s)\n", res, pcap_geterr(pcap));
             break;
         }
+        
         //printf("%u bytes captured\n", header->caplen);
         ST_RDT_HDR rdt = parseRadiotap(packet);
-        ST_BC_HDR bc = parseBeacon(packet+rdt.len);
+        ST_802_11 wireless = parse802_11(packet+rdt.len);
+        uint64_t wirelessLen = sizeof(wireless);
+        if (!chkBeacon(wireless)) continue;
+        //printf("beacon frame cpatured\n");
+        ST_PRINT prt;
+        prt.BSSID = getBssid(wireless);
+        ST_BC bc = parseBeacon(packet+wirelessLen);
+        uint64_t bcLen = sizeof(bc);
+        //printf("tag loc: %d\n", rdt.len+wirelessLen+bcLen);
+        const u_char* tag = (packet+rdt.len+wirelessLen+bcLen);
+        prt.ESSID = getEssid(tag, (header->caplen)-rdt.len-wirelessLen-bcLen);
+        printf("BSSID: %s       ESSID: %s\n", prt.BSSID.c_str(), prt.ESSID.c_str());
         //uint64_t subtypes = *(packet+headerLen);
         //uint64_t ssidLen = *(packet+headerLen+37);
         //uint64_t ssid = *(packet+headerLen+38);
@@ -98,18 +111,6 @@ int main(int argc, char* argv[])
         {
             //clean();
             //printf("radiotap len = %d, type = %x\n", headerLen, subtypes);
-            //printf("Beacon Frame Captured\n");
-            printf("bssid: ");
-            for (int i=0; i<6; i++)
-            {
-                if (i == 5)
-                {
-                    printf("%02x\n", *(packet+headerLen+16+i));
-                } else 
-                {
-                    printf("%02x:", *(packet+headerLen+16+i));
-                }
-            }
             //printf("ssid len = %x", ssidLen);
             //printf("%d\n", ssid);
             //std::cout << std::flush;
