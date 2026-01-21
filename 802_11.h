@@ -6,6 +6,6 @@ struct ST_802_11
     uint8_t addr2[6];
     uint8_t addr3[6];
     uint16_t sc;
-} __attribute__((pack));
+} __attribute__((packed));
 
 bool chkBeacon();
