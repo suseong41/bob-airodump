@@ -6,7 +6,7 @@
 ST_RDT_HDR parseRadiotap(const u_char* packet)
 {
     ST_RDT_HDR *pHdr = (ST_RDT_HDR*)packet; 
-    printf("len = %d\n", pHdr->len);
+    //printf("len = %d -> ", pHdr->len);
     return *pHdr;
 }
 
