@@ -8,6 +8,16 @@ struct ST_802_11
     uint16_t seqControl;
 } __attribute__((packed));
 
+struct ST_BC
+{
+    uint64_t timestamp;
+    uint16_t interval;
+    uint16_t capacity;
+} __attribute__((packed));
+
 ST_802_11 parse802_11(const u_char* packet);
 bool chkBeacon(ST_802_11 target);
 std::string getBssid(ST_802_11 bch);
+
+ST_BC parseBeacon(const u_char* packet);
+std::string getEssid(const u_char* packet, const int beaconLen);

@@ -2,15 +2,12 @@
 #include <string>
 #include <vector>
 #include <map>
-#include <stdbool.h>
 #include <pcap.h>
 #include <iostream>
 #include <unistd.h>
 
 #include "radiotap.h"
-#include "802_11.h"
-#include "beacon.h"
-
+#include "wireless.h"
 struct ST_PRINT
 {   
     std::string BSSID;
