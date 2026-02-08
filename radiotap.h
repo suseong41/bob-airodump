@@ -1,4 +1,6 @@
-struct ST_RDT_HDR
+#pragma once
+#pragma pack(push,1)
+struct ST_RDT
 {
     uint8_t version;
     uint8_t padding;
@@ -6,6 +8,5 @@ struct ST_RDT_HDR
     uint32_t present;
 } __attribute__((packed));
 
-ST_RDT_HDR parseRadiotap(const u_char* packet);
-
-int getPower();
+ST_RDT capRdt(const u_char* packet);
+int presentCount(const u_char* packet);

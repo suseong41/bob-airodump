@@ -1,23 +1,24 @@
-struct ST_802_11
+#pragma once
+#pragma pack(push, 1)
+struct ST_WL
 {
     uint16_t framControl;
     uint16_t duration_id;
-    uint8_t da[6];
-    uint8_t sa[6];
-    uint8_t bssid[6];
+    ST_MAC da;
+    ST_MAC sa;
+    ST_MAC bssid;
     uint16_t seqControl;
-} __attribute__((packed));
-
-struct ST_BC
+};
+struct ST_BC_COMMON
 {
     uint64_t timestamp;
     uint16_t interval;
     uint16_t capacity;
-} __attribute__((packed));
+};
+#pragma pack(pop)
 
-ST_802_11 parse802_11(const u_char* packet);
-bool chkBeacon(ST_802_11 target);
-std::string getBssid(ST_802_11 bch);
+ST_WL capWl(const u_char* packet);
+bool chkBeacon(ST_WL target);
 
-ST_BC parseBeacon(const u_char* packet);
+ST_BC_COMMON capBc(const u_char* packet);
 std::string getEssid(const u_char* packet, const int beaconLen);

@@ -6,8 +6,10 @@
 #include <iostream>
 #include <unistd.h>
 
+#include "mac.h"
 #include "radiotap.h"
 #include "wireless.h"
+
 struct ST_PRINT
 {   
     std::string BSSID;
@@ -23,6 +25,20 @@ struct ST_PRINT
     std::string ESSID;
 };
 
+static std::string prtMac(ST_MAC mac)
+{
+    std::string prt = "";
+    char buf[4];
+    for (int i=0; i<sizeof(mac); i++)
+    {
+        sprintf(buf, "%02X", mac.mac[i]);
+        prt += buf;
+
+        if ( i != 5) prt += ":";
+    }
+
+    return prt;
+}
 std::map<ST_PRINT, std::string> printDump()
 {
     std::map<ST_PRINT, std::string> print;
@@ -87,18 +103,18 @@ int main(int argc, char* argv[])
         }
         
         //printf("%u bytes captured\n", header->caplen);
-        ST_RDT_HDR rdt = parseRadiotap(packet);
-        ST_802_11 wireless = parse802_11(packet+rdt.len);
-        uint64_t wirelessLen = sizeof(wireless);
-        if (!chkBeacon(wireless)) continue;
+        ST_RDT rdt = capRdt(packet);
+        ST_WL wl = capWl(packet+rdt.len);
+        uint64_t wirelessLen = sizeof(wl);
+        if (!chkBeacon(wl)) continue;
         //printf("beacon frame cpatured\n");
         ST_PRINT prt;
-        prt.BSSID = getBssid(wireless);
-        ST_BC bc = parseBeacon(packet+wirelessLen);
-        uint64_t bcLen = sizeof(bc);
+        prt.BSSID = prtMac(wl.bssid);
+        ST_BC_COMMON bc_commoon = capBc(packet+wirelessLen);
+        uint64_t bcLen = sizeof(bc_commoon);
         //printf("tag loc: %d\n", rdt.len+wirelessLen+bcLen);
-        const u_char* tag = (packet+rdt.len+wirelessLen+bcLen);
-        prt.ESSID = getEssid(tag, (header->caplen)-rdt.len-wirelessLen-bcLen);
+        const u_char* tagStart = (packet+rdt.len+wirelessLen+bcLen);
+        prt.ESSID = getEssid(tagStart, (header->caplen)-rdt.len-wirelessLen-bcLen);
         printf("BSSID: %s       ESSID: %s\n", prt.BSSID.c_str(), prt.ESSID.c_str());
         //uint64_t subtypes = *(packet+headerLen);
         //uint64_t ssidLen = *(packet+headerLen+37);
@@ -120,7 +136,7 @@ int main(int argc, char* argv[])
     pcap_close(pcap);
     
     
-    printf("%-17s %3s %-7s %s %s %2s %3s %4s %6s %4s %5s\n", 
+    printf("%-17s %3s %-7s %s %s %2s %3s %4s %6s %4s %5s\n",
         "BSSID", "PWR", "BEACONS", "DATA", "/s", "CH", "MB", "ENC", "CIPHER", "AUTH", "ESSID");
     
     // 한 채널만 사용하면 잘 안보인다.. 왜 그럴까?
