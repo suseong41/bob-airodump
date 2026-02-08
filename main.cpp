@@ -13,11 +13,11 @@
 struct ST_PRINT
 {   
     std::string BSSID;
-    //std::string PWR;
+    std::string PWR;
     std::string BEACONS;
     std::string DATA;
     //std::string s;
-    //std::string CH;
+    std::string CH;
     //std::string MB;
     std::string ENC;
     //std::string CIPHER;
@@ -115,7 +115,11 @@ int main(int argc, char* argv[])
         //printf("tag loc: %d\n", rdt.len+wirelessLen+bcLen);
         const u_char* tagStart = (packet+rdt.len+wirelessLen+bcLen);
         prt.ESSID = getEssid(tagStart, (header->caplen)-rdt.len-wirelessLen-bcLen);
-        printf("BSSID: %s       ESSID: %s\n", prt.BSSID.c_str(), prt.ESSID.c_str());
+        std::map<std::string, int> info = getRdtInfo(packet, &rdt, presentCount(packet));
+        if (info["PWR"] != 999) prt.PWR = std::to_string(info["PWR"]);
+        if (info["CH"] != 0) prt.CH = std::to_string(info["CH"]);
+
+        printf("BSSID: %s  PWR: %s  CH: %s   ESSID: %s\n", prt.BSSID.c_str(),prt.PWR.c_str(),prt.CH.c_str(), prt.ESSID.c_str());
         //uint64_t subtypes = *(packet+headerLen);
         //uint64_t ssidLen = *(packet+headerLen+37);
         //uint64_t ssid = *(packet+headerLen+38);

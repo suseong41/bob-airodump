@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <string>
+#include <vector>
 #include <pcap.h>
 #include "mac.h"
 #include "wireless.h"
@@ -28,15 +29,19 @@ bool chkBeacon(ST_WL target)
     return false;
 }
 
+// 암호화는 48번 태그
+// http://www.ktword.co.kr/test/view/view.php?m_temp1=5593&id=758
 std::string getEssid(const u_char* packet, const int beaconLen)
 {
+    std::vector<std::vector<std::string>> info;
     const u_char* index = packet;
     const u_char* end = index + beaconLen;
-    while(index < end)
+    while(index + 2 < end)
     {
         uint8_t tagId = index[0];
         uint8_t tagLen = index[1];
         const u_char* data = index + 2;
+
         if (tagId == 0)
         {
             if (tagLen == 0) return "<length: 0>";
@@ -44,7 +49,13 @@ std::string getEssid(const u_char* packet, const int beaconLen)
             if (data[0] == 0 | data[1] == 0) return "<length: " + std::to_string(tagLen) + ">";
             return std::string((char*)data, tagLen);
         }
+        if (tagId == 48)
+        {
+            if (tagLen == 0) return "";
+        }
         index += (2 + tagLen);
+
+
     }
 
     return "";
